@@ -1,0 +1,1 @@
+Copy from [solana-pay example](https://github.com/solana-labs/solana-pay/tree/master/core)
