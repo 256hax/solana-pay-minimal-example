@@ -28,6 +28,7 @@ import { useState } from 'react';
 
 export const PaymentPage = () => {
   const { connection } = useConnection();
+  // const connection = new Connection('<QuickNode RPC>', 'confirmed');
   const { publicKey, sendTransaction } = useWallet();
 
   const MERCHANT_WALLET = new PublicKey('HXtBm8XZbxaTt41uqaKhwUAa6Z1aPyvJdsZVENiWsetg');
@@ -36,7 +37,6 @@ export const PaymentPage = () => {
 
   const createPayment = async () => {
     if (!publicKey) throw new WalletNotConnectedError();
-
 
     console.log("Let's simulate a Solana Pay flow ... \n");
 
@@ -172,8 +172,15 @@ export const PaymentPage = () => {
        *
        * You can implement a polling strategy to query for the transaction periodically.
        */
+      const maxRetry = 10;
+      let i = 0;
+
       const interval = setInterval(async () => {
+        if(i > maxRetry) { return }
+        i += 1;
+
         console.count('Checking for transaction...');
+
         try {
           signatureInfo = await findReference(
             connection,
@@ -190,7 +197,7 @@ export const PaymentPage = () => {
             reject(error);
           }
         }
-      }, 250);
+      }, 1000); // Retry every 1sec(=1000)
     });
 
     /**
