@@ -1,6 +1,6 @@
 // --- Lib ---
 import BigNumber from 'bignumber.js';
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 
 // --- Solana Common ---
 import {
@@ -21,6 +21,7 @@ import {
   encodeURL,
   parseURL,
   createTransfer,
+  createQR,
   findReference,
   FindReferenceError,
   validateTransfer,
@@ -35,6 +36,7 @@ export const PaymentPage = () => {
   const MERCHANT_WALLET = new PublicKey('55AfqEL3TC9mpkDZ63UCgDrzPcMQd5aZtDegfQCWQ5tK');
   const [valueReference, setReference] = useState<PublicKey>();
   const [valueUrl, setUrl] = useState<URL>();
+  const qrRef = useRef<HTMLDivElement>(null)
   let paymentStatus: string = '';
 
   const createPayment = async () => {
@@ -102,7 +104,6 @@ export const PaymentPage = () => {
      * The parameters needed to create the correct transaction is encoded within the URL
      */
     if(!valueUrl) throw 'Undefined payment request link(URL)';
-
     const {
       recipient,
       amount,
@@ -116,7 +117,6 @@ export const PaymentPage = () => {
      * Create the transaction with the parameters decoded from the URL
      */
     if(!amount) throw 'Undefined amount';
-
     const tx = await createTransfer(
       connection,
       publicKey, // If use your Keypair: MERCHANT_WALLET.publicKey
@@ -134,6 +134,21 @@ export const PaymentPage = () => {
     // Update payment status
     paymentStatus = 'pending';
     console.log('paymentStatus =>', paymentStatus);
+  };
+
+  const payQr = () => {
+    // encode URL in QR code
+    if(!valueUrl) throw 'Undefined payment request link(URL)';
+    const qrCode = createQR(valueUrl, 260); // Args: Payment URL, Size
+
+    // get a handle of the element
+    const element = document.getElementById('qr-code');
+
+    // append QR code to the element
+    if(qrRef.current){
+      qrRef.current.innerHTML = ''
+      qrCode.append(qrRef.current)
+    }
   };
 
   const checkPaymentStatus = async () => {
@@ -164,7 +179,11 @@ export const PaymentPage = () => {
     }: TransferRequestURL = parseURL(valueUrl) as TransferRequestURL;
 
     if(!valueReference) throw 'Undefined Reference';
-    const signatureInfo = await findReference(connection, valueReference, { finality: 'confirmed' });
+    const signatureInfo = await findReference(
+      connection,
+      valueReference,
+      { finality: 'confirmed' }
+    );
     console.log('\n 🖌  Signature found: ', signatureInfo.signature);
 
     // Update payment status
@@ -184,7 +203,11 @@ export const PaymentPage = () => {
     if(!amount) throw 'Undefined amount';
     try {
       const signature = signatureInfo.signature;
-      await validateTransfer(connection, signature, { recipient: MERCHANT_WALLET, amount });
+      await validateTransfer(
+        connection,
+        signature,
+        { recipient: MERCHANT_WALLET, amount }
+      );
 
       // Update payment status
       paymentStatus = 'validated';
@@ -197,11 +220,15 @@ export const PaymentPage = () => {
 
   return (
     <>
+      <hr />
       <div>
         <button onClick={createPayment}>1. Create Payment</button>
       </div>
       <div>
-        <button onClick={pay}>2. Pay</button>
+        <button onClick={pay}>2-a. Pay on Browser</button>
+        &nbsp; or &nbsp; 
+        <button onClick={payQr}>2-b. Pay on QR</button>
+        <div ref={qrRef} />
       </div>
       <div>
         <button onClick={checkPaymentStatus}>3. Check Payment Status</button>
