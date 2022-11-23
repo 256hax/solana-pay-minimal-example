@@ -1,7 +1,7 @@
 # Solana Pay Minimal Example
 
 ## Original Code
-This programs copy and customize from [solana-pay example](https://github.com/solana-labs/solana-pay/tree/master/core)
+This programs copy from [solana-pay example](https://github.com/solana-labs/solana-pay/tree/master/core) then customize for minimal example.
 
 ## Run
 ```
