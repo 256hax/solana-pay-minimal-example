@@ -32,7 +32,7 @@ export const PaymentPage = () => {
   // const connection = new Connection('', 'confirmed');
   const { publicKey, sendTransaction } = useWallet();
 
-  const MERCHANT_WALLET = new PublicKey('HXtBm8XZbxaTt41uqaKhwUAa6Z1aPyvJdsZVENiWsetg');
+  const MERCHANT_WALLET = new PublicKey('55AfqEL3TC9mpkDZ63UCgDrzPcMQd5aZtDegfQCWQ5tK');
   const [valueReference, setReference] = useState<PublicKey>();
   const [valueUrl, setUrl] = useState<URL>();
   let paymentStatus: string = '';
@@ -170,29 +170,29 @@ export const PaymentPage = () => {
     // Update payment status
     paymentStatus = 'confirmed';
 
-    // /**
-    //  * Validate transaction
-    //  *
-    //  * Once the `findTransactionSignature` function returns a signature,
-    //  * it confirms that a transaction with reference to this order has been recorded on-chain.
-    //  *
-    //  * `validateTransactionSignature` allows you to validate that the transaction signature
-    //  * found matches the transaction that you expected.
-    //  */
-    // console.log('\n6. 🔗 Validate transaction \n');
+    /**
+     * Validate transaction
+     *
+     * Once the `findTransactionSignature` function returns a signature,
+     * it confirms that a transaction with reference to this order has been recorded on-chain.
+     *
+     * `validateTransactionSignature` allows you to validate that the transaction signature
+     * found matches the transaction that you expected.
+     */
+    console.log('\n6. 🔗 Validate transaction \n');
 
-    // if(!amount) throw 'Undefined amount';
-    // try {
-    //   const signature = signatureInfo.signature;
-    //   await validateTransfer(connection, signature, { recipient: MERCHANT_WALLET, amount });
+    if(!amount) throw 'Undefined amount';
+    try {
+      const signature = signatureInfo.signature;
+      await validateTransfer(connection, signature, { recipient: MERCHANT_WALLET, amount });
 
-    //   // Update payment status
-    //   paymentStatus = 'validated';
-    //   console.log('✅ Payment validated');
-    //   console.log('📦 Ship order to customer');
-    // } catch (error) {
-    //   console.error('❌ Payment failed', error);
-    // }
+      // Update payment status
+      paymentStatus = 'validated';
+      console.log('✅ Payment validated');
+      console.log('📦 Ship order to customer');
+    } catch (error) {
+      console.error('❌ Payment failed', error);
+    }
   };
 
   return (
