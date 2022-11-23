@@ -8,3 +8,6 @@ This programs copy and customize from [solana-pay example](https://github.com/so
 % npm i
 % npm run dev
 ```
+
+## Screenshot
+![Screenshot](https://github.com/256hax/solana-pay-example/blob/main/minimal-example/docs/screenshot.png?raw=true)
