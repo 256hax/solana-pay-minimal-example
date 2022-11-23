@@ -1,5 +1,6 @@
 // --- Lib ---
 import BigNumber from 'bignumber.js';
+import { useState } from 'react';
 
 // --- Solana Common ---
 import {
@@ -24,15 +25,16 @@ import {
   FindReferenceError,
   validateTransfer,
 } from '@solana/pay';
-import { useState } from 'react';
+import type { TransferRequestURL } from '../modules/parseURL';
 
 export const PaymentPage = () => {
   const { connection } = useConnection();
-  // const connection = new Connection('<QuickNode RPC>', 'confirmed');
+  // const connection = new Connection('', 'confirmed');
   const { publicKey, sendTransaction } = useWallet();
 
   const MERCHANT_WALLET = new PublicKey('HXtBm8XZbxaTt41uqaKhwUAa6Z1aPyvJdsZVENiWsetg');
-  const [valueUrl, setUrl] = useState<any>();
+  const [valueReference, setReference] = useState<PublicKey>();
+  const [valueUrl, setUrl] = useState<URL>();
   let paymentStatus: string = '';
 
   const createPayment = async () => {
@@ -54,11 +56,13 @@ export const PaymentPage = () => {
      */
     console.log('\n2. 🛍 Simulate a customer checkout \n');
 
-    const label = 'Jungle Cats store';
-    const message = 'Jungle Cats store - your order - #001234';
-    const memo = 'JC#4098';
-    const amount = new BigNumber(0.001);
+    const amount    = new BigNumber(0.001);
     const reference = new Keypair().publicKey;
+    const label     = 'Jungle Cats store';
+    const message   = 'Jungle Cats store - your order - #001234';
+    const memo      = 'JC#4098';
+
+    setReference(reference);
 
     /**
      * Create a payment request link
@@ -69,12 +73,12 @@ export const PaymentPage = () => {
     console.log('3. 💰 Create a payment request link \n');
 
     const url = encodeURL({
-      recipient: MERCHANT_WALLET,
-      amount,
-      reference,
-      label,
-      message,
-      memo
+      recipient:  MERCHANT_WALLET,
+      amount:     amount,
+      reference:  reference,
+      label:      label,
+      message:    message,
+      memo:       memo,
     });
     console.log('url.href =>', url.href);
 
@@ -97,6 +101,8 @@ export const PaymentPage = () => {
      * The URL that triggers the wallet interaction; follows the Solana Pay URL scheme
      * The parameters needed to create the correct transaction is encoded within the URL
      */
+    if(!valueUrl) throw 'Undefined payment request link(URL)';
+
     const {
       recipient,
       amount,
@@ -104,11 +110,13 @@ export const PaymentPage = () => {
       label,
       message,
       memo
-    }: any = parseURL(valueUrl);
+    }: TransferRequestURL = parseURL(valueUrl) as TransferRequestURL;
 
     /**
      * Create the transaction with the parameters decoded from the URL
      */
+    if(!amount) throw 'Undefined amount';
+
     const tx = await createTransfer(
       connection,
       publicKey, // If use your Keypair: MERCHANT_WALLET.publicKey
@@ -149,78 +157,42 @@ export const PaymentPage = () => {
      *
      * You can implement a polling strategy to query for the transaction periodically.
      */
+    if(!valueUrl) throw 'Undefined payment request link(URL)';
     const {
-      recipient,
       amount,
       reference,
-      label,
-      message,
-      memo
-    }: any = parseURL(valueUrl);
+    }: TransferRequestURL = parseURL(valueUrl) as TransferRequestURL;
 
-    let signatureInfo;
+    if(!valueReference) throw 'Undefined Reference';
+    const signatureInfo = await findReference(connection, valueReference, { finality: 'confirmed' });
+    console.log('\n 🖌  Signature found: ', signatureInfo.signature);
 
-    const { signature }: any = await new Promise((resolve, reject) => {
-      /**
-       * Retry until we find the transaction
-       *
-       * If a transaction with the given reference can't be found, the `findTransactionSignature`
-       * function will throw an error. There are a few reasons why this could be a false negative:
-       *
-       * - Transaction is not yet confirmed
-       * - Customer is yet to approve/complete the transaction
-       *
-       * You can implement a polling strategy to query for the transaction periodically.
-       */
-      const maxRetry = 10;
-      let i = 0;
+    // Update payment status
+    paymentStatus = 'confirmed';
 
-      const interval = setInterval(async () => {
-        if(i > maxRetry) { return }
-        i += 1;
+    // /**
+    //  * Validate transaction
+    //  *
+    //  * Once the `findTransactionSignature` function returns a signature,
+    //  * it confirms that a transaction with reference to this order has been recorded on-chain.
+    //  *
+    //  * `validateTransactionSignature` allows you to validate that the transaction signature
+    //  * found matches the transaction that you expected.
+    //  */
+    // console.log('\n6. 🔗 Validate transaction \n');
 
-        console.count('Checking for transaction...');
+    // if(!amount) throw 'Undefined amount';
+    // try {
+    //   const signature = signatureInfo.signature;
+    //   await validateTransfer(connection, signature, { recipient: MERCHANT_WALLET, amount });
 
-        try {
-          signatureInfo = await findReference(
-            connection,
-            new PublicKey(reference),
-            { finality: 'confirmed' }
-          );
-          console.log('\n 🖌  Signature found: ', signatureInfo.signature);
-          clearInterval(interval);
-          resolve(signatureInfo);
-        } catch (error: any) {
-          if (!(error instanceof FindReferenceError)) {
-            console.error(error);
-            clearInterval(interval);
-            reject(error);
-          }
-        }
-      }, 1000); // Retry every 1sec(=1000)
-    });
-
-    /**
-     * Validate transaction
-     *
-     * Once the `findTransactionSignature` function returns a signature,
-     * it confirms that a transaction with reference to this order has been recorded on-chain.
-     *
-     * `validateTransactionSignature` allows you to validate that the transaction signature
-     * found matches the transaction that you expected.
-     */
-    console.log('\n6. 🔗 Validate transaction \n');
-
-    try {
-      await validateTransfer(connection, signature, { recipient: MERCHANT_WALLET, amount });
-
-      // Update payment status
-      paymentStatus = 'validated';
-      console.log('✅ Payment validated');
-      console.log('📦 Ship order to customer');
-    } catch (error) {
-      console.error('❌ Payment failed', error);
-    }
+    //   // Update payment status
+    //   paymentStatus = 'validated';
+    //   console.log('✅ Payment validated');
+    //   console.log('📦 Ship order to customer');
+    // } catch (error) {
+    //   console.error('❌ Payment failed', error);
+    // }
   };
 
   return (
