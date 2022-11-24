@@ -26,7 +26,7 @@ import {
   FindReferenceError,
   validateTransfer,
 } from '@solana/pay';
-import type { TransferRequestURL } from '../modules/parseURL';
+import type { TransferRequestURL } from '../types/parseURL';
 
 export const PaymentPage = () => {
   const { connection } = useConnection();
