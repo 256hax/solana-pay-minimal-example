@@ -34,7 +34,6 @@ export const PaymentPage = () => {
   const { publicKey, sendTransaction } = useWallet();
 
   const MERCHANT_WALLET = new PublicKey('55AfqEL3TC9mpkDZ63UCgDrzPcMQd5aZtDegfQCWQ5tK');
-  const [valueReference, setReference] = useState<PublicKey>();
   const [valueUrl, setUrl] = useState<URL>();
   const qrRef = useRef<HTMLDivElement>(null)
   let paymentStatus: string = '';
@@ -63,8 +62,6 @@ export const PaymentPage = () => {
     const label     = 'Jungle Cats store';
     const message   = 'Jungle Cats store - your order - #001234';
     const memo      = 'JC#4098';
-
-    setReference(reference);
 
     /**
      * Create a payment request link
@@ -175,13 +172,13 @@ export const PaymentPage = () => {
     if(!valueUrl) throw 'Undefined payment request link(URL)';
     const {
       amount,
-      reference,
+      reference, // Type: PublicKey[] (array)
     }: TransferRequestURL = parseURL(valueUrl) as TransferRequestURL;
 
-    if(!valueReference) throw 'Undefined Reference';
+    if(!reference) throw 'Undefined Reference';
     const signatureInfo = await findReference(
       connection,
-      valueReference,
+      reference[0], // Type: PublicKey (not array)
       { finality: 'confirmed' }
     );
     console.log('\n 🖌  Signature found: ', signatureInfo.signature);
