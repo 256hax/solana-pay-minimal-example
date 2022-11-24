@@ -13,6 +13,36 @@ This programs copy from [solana-pay example](https://github.com/solana-labs/sola
 ![Screenshot](https://github.com/256hax/solana-pay-example/blob/main/minimal-example/docs/screenshot.png?raw=true)  
 ![Screenshot Phantom](https://github.com/256hax/solana-pay-minimal-example/blob/main/minimal-example/docs/screenshot-phantom.PNG?raw=true)  
 
+## Message Log
+```
+Let's simulate a Solana Pay flow ... 
+
+1. ✅ Establish connection to the cluster
+
+2. 🛍 Simulate a customer checkout 
+
+3. 💰 Create a payment request link 
+
+url.href => solana:55AfqEL3TC9mpkDZ63UCgDrzPcMQd5aZtDegfQCWQ5tK?amount=0.001&reference=DvQaGfvQ6imjEJmhymTgFx2LeH2E4uiHjg7jWtKLYENL&label=Jungle+Cats+store&message=Jungle+Cats+store+-+your+order+-+%23001234&memo=JC%234098
+
+4. 🔐 Simulate wallet interaction 
+
+tx => Transaction {signatures: Array(0), feePayer: PublicKey, instructions: Array(2), recentBlockhash: '7xorxBHpJwAKZMZngqHs2rdZN2cZoPxKbgUwL7UiC6Sy', lastValidBlockHeight: undefined, …}
+
+signature => 5gXmgaW7Xv4GuCkj82V3oCmdhy3sPLgY8xcuBu1kQVZw3FFL9M8UefiAVad7Pcjt5jrUx9XQMGsAGD5tPeVmizcr
+
+paymentStatus => pending
+
+5. Find the transaction
+
+🖌  Signature found:  5gXmgaW7Xv4GuCkj82V3oCmdhy3sPLgY8xcuBu1kQVZw3FFL9M8UefiAVad7Pcjt5jrUx9XQMGsAGD5tPeVmizcr
+
+6. 🔗 Validate transaction 
+
+✅ Payment validated
+📦 Ship order to customer
+```
+
 ## How to Send Token
 [Optional. SPL token transfer](https://docs.solanapay.com/core/transfer-request/merchant-integration#optional-spl-token-transfer)
 
