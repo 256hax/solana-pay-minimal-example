@@ -115,8 +115,8 @@ export const PaymentPage = () => {
      */
     if(!amount) throw 'Undefined amount';
     const tx = await createTransfer(
-      connection,
-      publicKey, // If use your Keypair: MERCHANT_WALLET.publicKey
+      connection, // connectiuon
+      publicKey, // sender
       { recipient, amount, reference, memo }
     );
     console.log('tx =>', tx);
