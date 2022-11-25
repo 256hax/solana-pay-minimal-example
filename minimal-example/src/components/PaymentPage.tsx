@@ -178,9 +178,10 @@ export const PaymentPage = () => {
     if(!reference) throw 'Undefined Reference';
     const signatureInfo = await findReference(
       connection,
-      reference[0], // Type: PublicKey (not array)
+      reference[0], // Type: PublicKey (not array). parseURL get PublicKey[] so it need to [0].
       { finality: 'confirmed' }
     );
+    console.log('signatureInfo =>', signatureInfo);
     console.log('\n 🖌  Signature found: ', signatureInfo.signature);
 
     // Update payment status

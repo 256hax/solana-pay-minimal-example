@@ -35,6 +35,8 @@ paymentStatus => pending
 
 5. Find the transaction
 
+signatureInfo => {blockTime: 1669354389, confirmationStatus: 'confirmed', err: null, memo: '[7] JC#4098', signature: '5gXmgaW7Xv4GuCkj82V3oCmdhy3sPLgY8xcuBu1kQVZw3FFL9M8UefiAVad7Pcjt5jrUx9XQMGsAGD5tPeVmizcr', …}
+
 🖌  Signature found:  5gXmgaW7Xv4GuCkj82V3oCmdhy3sPLgY8xcuBu1kQVZw3FFL9M8UefiAVad7Pcjt5jrUx9XQMGsAGD5tPeVmizcr
 
 6. 🔗 Validate transaction 
