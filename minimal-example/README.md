@@ -46,7 +46,8 @@ signatureInfo => {blockTime: 1669354389, confirmationStatus: 'confirmed', err: n
 ```
 
 ## How to Send Token
-[Optional. SPL token transfer](https://docs.solanapay.com/core/transfer-request/merchant-integration#optional-spl-token-transfer)
+- [Optional. SPL token transfer](https://docs.solanapay.com/core/transfer-request/merchant-integration#optional-spl-token-transfer)
+- [Create transaction](https://docs.solanapay.com/core/transfer-request/wallet-integration#3-create-transaction)
 
 ```
 For SPL Token transfers, use the spl-token parameter. The spl-token is the mint address of the SPL token.
