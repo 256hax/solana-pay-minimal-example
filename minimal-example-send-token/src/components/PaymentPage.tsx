@@ -9,8 +9,17 @@ import {
   Keypair,
   PublicKey,
   LAMPORTS_PER_SOL,
+  Transaction,
+  TransactionBlockhashCtor,
   sendAndConfirmTransaction,
 } from '@solana/web3.js';
+import {
+  createTransferInstruction,
+  getAssociatedTokenAddress,
+  createAssociatedTokenAccountInstruction,
+  createTransferCheckedInstruction,
+  getMint,
+} from '@solana/spl-token';
 
 // --- Solana Wallet Adapter ---
 import { WalletNotConnectedError } from '@solana/wallet-adapter-base';
@@ -31,9 +40,10 @@ import type { TransferRequestURL } from '../types/parseURL';
 export const PaymentPage = () => {
   const { connection } = useConnection();
   // const connection = new Connection('', 'confirmed');
-  const { publicKey, sendTransaction } = useWallet();
+  const { publicKey, sendTransaction, signTransaction } = useWallet();
 
-  const MERCHANT_WALLET = new PublicKey(import.meta.env.VITE_MERCHANT_WALLET);
+  // const MERCHANT_WALLET = new PublicKey(import.meta.env.VITE_MERCHANT_WALLET);
+  const MERCHANT_WALLET = Keypair.generate().publicKey; // Generate random wallet for ATA test
   const [valueUrl, setUrl] = useState<URL>();
   const qrRef = useRef<HTMLDivElement>(null)
   let paymentStatus: string = '';
@@ -87,7 +97,7 @@ export const PaymentPage = () => {
   }
 
   const pay = async () => {
-    if (!publicKey) throw new WalletNotConnectedError();
+    if (!publicKey || !signTransaction) throw new WalletNotConnectedError();
 
     /**
      * Simulate wallet interaction
@@ -113,23 +123,98 @@ export const PaymentPage = () => {
       memo,
     }: TransferRequestURL = parseURL(valueUrl) as TransferRequestURL;
 
-    /**
-     * Create the transaction with the parameters decoded from the URL
-     */
-    if(!amount) throw 'Undefined amount';
-    const tx = await createTransfer(
-      connection, // connectiuon
-      publicKey, // sender
-      { recipient, amount, splToken, reference, memo }
-    );
-    console.log('tx =>', tx);
+    // --------------------------------------------------
+    //  Init Transaction Instruction
+    // --------------------------------------------------
+    const latestBlockHash = await connection.getLatestBlockhash();
+    const options: TransactionBlockhashCtor = {
+      feePayer: publicKey,
+      blockhash: latestBlockHash.blockhash,
+      lastValidBlockHeight: latestBlockHash.lastValidBlockHeight,
+    };
+    let transaction = new Transaction(options);
 
-    /**
-     * Send the transaction to the network
-     */
-    // sendAndConfirmTransaction(connection, tx, [MERCHANT_WALLET]); // If use your Keypair
-    const signature = await sendTransaction(tx, connection);
-    console.log('signature =>', signature);
+    // --------------------------------------------------
+    //  Get ATA
+    // --------------------------------------------------
+    if(!splToken) throw 'Not found Token Address';
+    const senderTokenAccount = await getAssociatedTokenAddress(
+      splToken,
+      publicKey,
+    );
+
+    const recipientTokenAccount = await getAssociatedTokenAddress(
+      splToken,
+      recipient,
+    );
+
+    // --------------------------------------------------
+    //  Get ATA Info
+    // --------------------------------------------------
+    // getAccountInfo Method
+    // Returns:
+    //   data: get ATA details if exist ATA (it means created ATA before)
+    //   Null: doesn't exist ATA (not created)
+    const senderAccountInfo = await connection.getAccountInfo(senderTokenAccount);
+    const recipientAccountInfo = await connection.getAccountInfo(recipientTokenAccount);
+
+    // --------------------------------------------------
+    //  Create ATA Instructions if doesn't exist
+    // --------------------------------------------------
+    if(!senderAccountInfo || !senderAccountInfo.data) {
+      transaction.add(
+        createAssociatedTokenAccountInstruction(
+          publicKey, // payer
+          senderTokenAccount, // associatedToken
+          publicKey, // owner
+          splToken, // mint
+        )
+      );
+    }
+
+    if(!recipientAccountInfo || !recipientAccountInfo.data) {
+      transaction.add(
+        createAssociatedTokenAccountInstruction(
+          publicKey, // payer
+          recipientTokenAccount, // associatedToken
+          recipient, // owner
+          splToken, // mint
+        )
+      );
+    }
+
+    // --------------------------------------------------
+    //  Create Transfer Intstruction
+    // --------------------------------------------------
+    if(!amount) throw 'Undefined amount';
+    const splTokenInfo = await getMint(connection, splToken);
+
+    const transferInstruction = createTransferCheckedInstruction(
+      senderTokenAccount, // source
+      splToken, // mint (token address)
+      recipientTokenAccount, // destination
+      publicKey, // owner of source address
+      amount.toNumber() * (10 ** (splTokenInfo).decimals),
+      splTokenInfo.decimals, // decimals of the USDC token
+    );
+
+    // Add the reference to the instruction as a key
+    // This will mean this transaction is returned when we query for the reference
+    if(!reference) throw 'Not found reference';
+    transferInstruction.keys.push({
+      pubkey: reference[0],
+      isSigner: false,
+      isWritable: false,
+    });
+
+    transaction.add(transferInstruction);
+
+    // --------------------------------------------------
+    //  Transfer
+    // --------------------------------------------------
+    const signed = await signTransaction(transaction);
+    const tx = await connection.sendRawTransaction(signed.serialize());
+    console.log('tx =>', tx);
 
     // Update payment status
     paymentStatus = 'pending';
@@ -174,6 +259,7 @@ export const PaymentPage = () => {
      */
     if(!valueUrl) throw 'Undefined payment request link(URL)';
     const {
+      recipient,
       amount,
       splToken,
       reference, // Type: PublicKey[] (array)
@@ -208,7 +294,7 @@ export const PaymentPage = () => {
       await validateTransfer(
         connection,
         signature,
-        { recipient: MERCHANT_WALLET, amount, splToken }
+        { recipient, amount, splToken }
       );
 
       // Update payment status
