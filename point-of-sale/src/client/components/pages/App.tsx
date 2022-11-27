@@ -6,7 +6,8 @@ import { PublicKey } from '@solana/web3.js';
 import { AppContext, AppProps as NextAppProps, default as NextApp } from 'next/app';
 import { AppInitialProps } from 'next/dist/shared/lib/utils';
 import { FC, useMemo } from 'react';
-import { DEVNET_ENDPOINT } from '../../utils/constants';
+import { DEVNET_ENDPOINT, DEVNET_DUMMY_MINT } from '../../utils/constants';
+import { USDCIcon } from '../images/USDCIcon';
 import { ConfigProvider } from '../contexts/ConfigProvider';
 import { FullscreenProvider } from '../contexts/FullscreenProvider';
 import { PaymentProvider } from '../contexts/PaymentProvider';
@@ -68,6 +69,7 @@ const App: FC<AppProps> & { getInitialProps(appContext: AppContext): Promise<App
                     <ConnectionProvider endpoint={DEVNET_ENDPOINT}>
                         <WalletProvider wallets={wallets} autoConnect={connectWallet}>
                             <WalletModalProvider>
+                                {/*
                                 <ConfigProvider
                                     baseURL={baseURL}
                                     link={link}
@@ -78,6 +80,20 @@ const App: FC<AppProps> & { getInitialProps(appContext: AppContext): Promise<App
                                     icon={<SOLIcon />}
                                     decimals={9}
                                     minDecimals={1}
+                                    connectWallet={connectWallet}
+                                >
+                                */}
+                                <ConfigProvider
+                                    baseURL={baseURL}
+                                    link={link}
+                                    recipient={recipient}
+                                    label={label}
+                                    message={message}
+                                    splToken={DEVNET_DUMMY_MINT}
+                                    symbol="USDC"
+                                    icon={<USDCIcon />}
+                                    decimals={6}
+                                    minDecimals={2}
                                     connectWallet={connectWallet}
                                 >
                                     <TransactionsProvider>
