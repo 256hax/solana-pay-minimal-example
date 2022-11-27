@@ -1,4 +1,4 @@
-# Solana Pay Minimal Example
+# Send Token on Solana Pay for Minimal Example
 Available for Devnet.
 
 ## Original Code
