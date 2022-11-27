@@ -117,7 +117,7 @@ export const PaymentPage = () => {
       recipient,
       amount,
       splToken,
-      reference,
+      reference, // Type: PublicKey[]
       label,
       message,
       memo,
@@ -202,7 +202,7 @@ export const PaymentPage = () => {
     // This will mean this transaction is returned when we query for the reference
     if(!reference) throw 'Not found reference';
     transferInstruction.keys.push({
-      pubkey: reference[0],
+      pubkey: reference[0], // Type: PublicKey (not array). parseURL get PublicKey[] so it need to [0].
       isSigner: false,
       isWritable: false,
     });
