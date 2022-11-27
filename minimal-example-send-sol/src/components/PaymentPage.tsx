@@ -33,7 +33,7 @@ export const PaymentPage = () => {
   // const connection = new Connection('', 'confirmed');
   const { publicKey, sendTransaction } = useWallet();
 
-  const MERCHANT_WALLET = new PublicKey('55AfqEL3TC9mpkDZ63UCgDrzPcMQd5aZtDegfQCWQ5tK');
+  const MERCHANT_WALLET = new PublicKey(import.meta.env.VITE_MERCHANT_WALLET);
   const [valueUrl, setUrl] = useState<URL>();
   const qrRef = useRef<HTMLDivElement>(null)
   let paymentStatus: string = '';
