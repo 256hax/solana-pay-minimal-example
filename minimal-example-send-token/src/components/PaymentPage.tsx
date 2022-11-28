@@ -82,7 +82,7 @@ export const PaymentPage = () => {
      */
     console.log('3. 💰 Create a payment request link \n');
 
-    const url = encodeURL({
+    const paymentLink = encodeURL({
       recipient:  MERCHANT_WALLET,
       amount:     amount,
       splToken:   splToken,
@@ -91,9 +91,9 @@ export const PaymentPage = () => {
       message:    message,
       memo:       memo,
     });
-    console.log('url.href =>', url.href);
+    console.log('paymentLink.href =>', paymentLink.href);
 
-    setPaymentLink(url);
+    setPaymentLink(paymentLink);
   }
 
   const pay = async () => {
