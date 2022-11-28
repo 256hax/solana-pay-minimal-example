@@ -44,7 +44,7 @@ export const PaymentPage = () => {
 
   // const MERCHANT_WALLET = new PublicKey(import.meta.env.VITE_MERCHANT_WALLET);
   const MERCHANT_WALLET = Keypair.generate().publicKey; // Generate random wallet for ATA test
-  const [valueUrl, setUrl] = useState<URL>();
+  const [valuePaymentLink, setPaymentLink] = useState<URL>();
   const qrRef = useRef<HTMLDivElement>(null)
   let paymentStatus: string = '';
 
@@ -93,7 +93,7 @@ export const PaymentPage = () => {
     });
     console.log('url.href =>', url.href);
 
-    setUrl(url);
+    setPaymentLink(url);
   }
 
   const pay = async () => {
@@ -112,7 +112,7 @@ export const PaymentPage = () => {
      * The URL that triggers the wallet interaction; follows the Solana Pay URL scheme
      * The parameters needed to create the correct transaction is encoded within the URL
      */
-    if(!valueUrl) throw 'Undefined payment request link(URL)';
+    if(!valuePaymentLink) throw 'Undefined payment request link(URL)';
     const {
       recipient,
       amount,
@@ -121,7 +121,7 @@ export const PaymentPage = () => {
       label,
       message,
       memo,
-    }: TransferRequestURL = parseURL(valueUrl) as TransferRequestURL;
+    }: TransferRequestURL = parseURL(valuePaymentLink) as TransferRequestURL;
 
     // --------------------------------------------------
     //  Init Transaction Instruction
@@ -223,8 +223,8 @@ export const PaymentPage = () => {
 
   const payQr = () => {
     // encode URL in QR code
-    if(!valueUrl) throw 'Undefined payment request link(URL)';
-    const qrCode = createQR(valueUrl, 260); // Args: Payment URL, Size
+    if(!valuePaymentLink) throw 'Undefined payment request link(URL)';
+    const qrCode = createQR(valuePaymentLink, 260); // Args: Payment URL, Size
 
     // get a handle of the element
     const element = document.getElementById('qr-code');
@@ -257,13 +257,13 @@ export const PaymentPage = () => {
      *
      * You can implement a polling strategy to query for the transaction periodically.
      */
-    if(!valueUrl) throw 'Undefined payment request link(URL)';
+    if(!valuePaymentLink) throw 'Undefined payment request link(URL)';
     const {
       recipient,
       amount,
       splToken,
       reference, // Type: PublicKey[] (array)
-    }: TransferRequestURL = parseURL(valueUrl) as TransferRequestURL;
+    }: TransferRequestURL = parseURL(valuePaymentLink) as TransferRequestURL;
 
     if(!reference) throw 'Undefined Reference';
     const signatureInfo = await findReference(
