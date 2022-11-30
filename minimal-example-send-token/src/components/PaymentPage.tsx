@@ -4,17 +4,12 @@ import { useState, useRef } from 'react';
 
 // --- Solana Common ---
 import {
-  Connection,
-  clusterApiUrl,
   Keypair,
   PublicKey,
-  LAMPORTS_PER_SOL,
   Transaction,
   TransactionBlockhashCtor,
-  sendAndConfirmTransaction,
 } from '@solana/web3.js';
 import {
-  createTransferInstruction,
   getAssociatedTokenAddress,
   createAssociatedTokenAccountInstruction,
   createTransferCheckedInstruction,
@@ -29,10 +24,8 @@ import { useConnection, useWallet } from '@solana/wallet-adapter-react';
 import {
   encodeURL,
   parseURL,
-  createTransfer,
   createQR,
   findReference,
-  FindReferenceError,
   validateTransfer,
 } from '@solana/pay';
 import type { TransferRequestURL } from '../types/parseURL';
@@ -96,7 +89,7 @@ export const PaymentPage = () => {
     setPaymentLink(paymentUrl);
   }
 
-  const pay = async () => {
+  const payOnBrowser = async () => {
     if (!publicKey || !signTransaction) throw new WalletNotConnectedError();
 
     /**
@@ -221,13 +214,10 @@ export const PaymentPage = () => {
     console.log('paymentStatus =>', paymentStatus);
   };
 
-  const payQr = () => {
+  const payOnQr = () => {
     // encode URL in QR code
     if(!valuePaymentLink) throw 'Undefined payment request link(URL)';
     const qrCode = createQR(valuePaymentLink, 260); // Args: Payment URL, Size
-
-    // get a handle of the element
-    const element = document.getElementById('qr-code');
 
     // append QR code to the element
     if(qrRef.current){
@@ -313,9 +303,9 @@ export const PaymentPage = () => {
         <button onClick={createPayment}>1. Create Payment</button>
       </div>
       <div>
-        <button onClick={pay}>2-a. Pay on Browser</button>
+        <button onClick={payOnBrowser}>2-a. Pay on Browser</button>
         &nbsp; or &nbsp; 
-        <button onClick={payQr}>2-b. Pay on QR</button>
+        <button onClick={payOnQr}>2-b. Pay on QR</button>
         <div ref={qrRef} />
       </div>
       <div>
