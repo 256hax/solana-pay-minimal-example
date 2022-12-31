@@ -3,9 +3,12 @@
 ## Example
 Look at each directories.
 
-## Buy NFT
-Customer send USDC to merchant then airdrop an NFT to customer.  
-[solana-pay - nft-create](https://github.com/solana-labs/solana-pay/blob/e0fccc7d67993179162cefe82053375d30b0fb74/examples/nft-create/pages/api/checkout.ts)
+## Buy NFT using Solana Pay
+Solana Pay doesn't work for NFT.  
+
+But there are some aproach(Transfer Token/SOL then airdrop NFT):
+- [solana-pay - nft-create](https://github.com/solana-labs/solana-pay/blob/e0fccc7d67993179162cefe82053375d30b0fb74/examples/nft-create/pages/api/checkout.ts)
+- [SokuPay](https://github.com/SokuPay)
 
 ## Reference
 - [Docs - Solana Pay](https://docs.solanapay.com/)
