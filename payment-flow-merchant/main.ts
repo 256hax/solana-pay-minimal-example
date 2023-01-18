@@ -26,6 +26,14 @@ async function main() {
     console.log('\n2. 🛍 Simulate a customer checkout \n');
     const { label, message, memo, amount, reference } = await simulateCheckout();
 
+    console.log('MERCHANT_WALLET =>', MERCHANT_WALLET.toString());
+    
+    console.log('label =>', label);
+    console.log('message =>', message);
+    console.log('memo =>', memo);
+    console.log('amount =>', Number(amount));
+    console.log('reference =>', reference.toString());
+    
     /**
      * Create a payment request link
      *
@@ -35,6 +43,8 @@ async function main() {
     console.log('3. 💰 Create a payment request link \n');
     const url = encodeURL({ recipient: MERCHANT_WALLET, amount, reference, label, message, memo });
 
+    console.log('url =>', url.href);
+    
     /**
      * Simulate wallet interaction
      *
