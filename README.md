@@ -16,3 +16,6 @@ But there are some aproach(Transfer Token/SOL then airdrop NFT):
 - [API - @solana/pay](https://docs.solanapay.com/api/core)
 - [GitHub - solana-labs/solana-pay](https://github.com/solana-labs/solana-pay)
 - [GitHub - solana-pay types](https://github.com/solana-labs/solana-pay/tree/master/core/src)
+
+## Other Resource
+- [solana-developers/workshops - Solana Pay Transaction Requests](https://github.com/solana-developers/workshops/tree/main/workshops/storefront-solanapay)
