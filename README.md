@@ -3,6 +3,10 @@
 ## Example
 Look at each directories.
 
+## IMPORTANT
+Some times Phantom doesn't work for QR code payment(e.g. "FindReferenceError: not found" error).  
+If you encounting that, use Solflare instead of Phantom.
+
 ## Buy NFT using Solana Pay
 Solana Pay doesn't work for NFT.  
 
